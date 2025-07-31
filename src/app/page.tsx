@@ -1,103 +1,152 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useChat } from 'ai/react';
+import { Bot, Send, User } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import ReactMarkdown from 'react-markdown';
+
+export default function ChatPage() {
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    api: '/api/chat',
+  });
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="flex h-screen flex-col bg-[#181818] text-gray-100">
+      {/* Header */}
+      <header className="sticky top-0 z-10 border-b border-gray-800 bg-[#181818]/95 backdrop-blur-lg supports-[backdrop-filter]:bg-[#181818]/80">
+        <div className="container flex flex-col fle items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#B51D2A] to-[#8e1620] shadow-md">
+              <Bot className="h-8 w-8 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight">mumet.in</h1>
+          </div>
+          <div className="text-sm font-medium text-gray-400">
+            Powered by Groq & LLaMA 3 70B
+          </div>
+        </div>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Chat Area */}
+      <main className="flex-1 overflow-hidden">
+        <div className="flex h-full w-full flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-6">
+            {messages.length === 0 ? (
+              <div className="flex h-full flex-col items-center justify-center text-center">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#B51D2A]/10 shadow-inner">
+                  <Bot className="h-10 w-10 text-[#B51D2A]" />
+                </div>
+                <h2 className="mt-6 text-4xl font-bold tracking-tight">
+                  {process.env.NEXT_PUBLIC_SITE_NAME}
+                </h2>
+                <p className="mt-3 max-w-md text-gray-400">
+                  {process.env.NEXT_PUBLIC_SITE_DESCRIPTION}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    {message.role === 'assistant' && (
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#B51D2A] to-[#8e1620] shadow-md">
+                        <Bot className="h-5 w-5 text-white" />
+                      </div>
+                    )}
+                    <div
+                      className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-md ${
+                        message.role === 'user'
+                          ? 'bg-gradient-to-br from-[#B51D2A] to-[#8e1620] text-white'
+                          : 'bg-[#262626] text-white'
+                      }`}
+                    >
+                      <div className="prose max-w-none break-words text-sm">
+                        <ReactMarkdown
+                          components={{
+                            pre: ({ node, ...props }) => (
+                              <div className="my-2 w-full overflow-x-auto rounded-lg bg-[#1e1e1e] p-3 shadow-inner">
+                                <pre {...props} />
+                              </div>
+                            ),
+                            code: ({ node, ...props }) => (
+                              <code
+                                className="rounded bg-[#1e1e1e] px-1.5 py-0.5 text-sm"
+                                {...props}
+                              />
+                            ),
+                            a: ({ node, ...props }) => (
+                              <a
+                                className="text-[#B51D2A] hover:underline"
+                                {...props}
+                              />
+                            ),
+                            blockquote: ({ node, ...props }) => (
+                              <blockquote
+                                className="border-l-4 border-[#B51D2A] pl-4 text-gray-300"
+                                {...props}
+                              />
+                            ),
+                            ul: ({ node, ...props }) => (
+                              <ul className="list-disc pl-5" {...props} />
+                            ),
+                            ol: ({ node, ...props }) => (
+                              <ol className="list-decimal pl-5" {...props} />
+                            ),
+                          }}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                    {message.role === 'user' && (
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#262626] shadow-md">
+                        <User className="h-5 w-5 text-white" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+          </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+      {/* Input Area */}
+      <div className="sticky bottom-0 border-t border-gray-800 bg-[#181818]/95 p-4 backdrop-blur-lg supports-[backdrop-filter]:bg-[#181818]/80">
+        <form onSubmit={handleSubmit} className="mx-auto flex max-w-4xl gap-3">
+          <Input
+            value={input}
+            onChange={handleInputChange}
+            placeholder="Tanyakan apa saja..."
+            disabled={isLoading}
+            className="flex-1 bg-[#262626] text-white placeholder-gray-400 focus:border-[#B51D2A] focus:ring-[#B51D2A]/30"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <Button
+            type="submit"
+            disabled={isLoading || !input.trim()}
+            className="bg-gradient-to-br from-[#B51D2A] to-[#8e1620] shadow-md hover:from-[#9e1a26] hover:to-[#75121b]"
+          >
+            {isLoading ? (
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            ) : (
+              <Send className="h-5 w-5" />
+            )}
+          </Button>
+        </form>
+        <p className="mt-3 text-center text-xs text-gray-500">
+          mumet.in bisa membuat kesalahan, harap verifikasi informasi penting.
+        </p>
+      </div>
     </div>
   );
 }
