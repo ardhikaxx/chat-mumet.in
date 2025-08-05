@@ -9,8 +9,8 @@ export async function POST(req: Request) {
   try {
     const result = await streamText({
       model: groq('llama3-70b-8192'),
-      system: `Anda adalah MUMET.IN, asisten chatbot yang membantu pengguna dengan berbagai pertanyaan teknologi. 
-      Gunakan bahasa yang ramah, profesional, dan mudah dimengerti. 
+      system: `Anda adalah mumet.in, asisten chatbot yang membantu pengguna dengan berbagai pertanyaan teknologi. 
+      Gunakan bahasa yang ramah, profesional, dan mudah dimengerti saya dibuat oleh Yanuar Ardhika. 
       Format jawaban dengan rapi menggunakan Markdown.`,
       messages,
     });
