@@ -2,7 +2,7 @@
 'use client';
 
 import { useChat } from 'ai/react';
-import { Bot, Send, User, Sparkles, CornerDownLeft, Copy, Check } from 'lucide-react';
+import { Bot, User, Sparkles, CornerDownLeft, Copy, Check } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,6 +52,22 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen flex-col bg-[#0a0a0a] text-gray-100 overflow-hidden">
+      {/* Header */}
+      <header className="sticky top-0 z-10 border-b border-gray-800 bg-[#181818]/95 backdrop-blur-lg supports-[backdrop-filter]:bg-[#181818]/80">
+        <div className="flex flex-col items-center justify-center py-4 px-5">
+          <h1 className="text-4xl font-bold tracking-tight"><span className="text-white">mumet</span>
+            <span className="text-[#B51D2A]">.in</span></h1>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="mt-3 max-w-md flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#ffffff08] border border-[#ffffff05]"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-[#B51D2A]" />
+            <span className="text-xs font-medium text-gray-300/90">Powered by Groq & LLaMA 3 70B</span>
+          </motion.div>
+        </div>
+      </header>
       {/* Chat Area */}
       <main className="flex-1 overflow-hidden relative">
         {/* Subtle grid pattern */}
@@ -92,14 +108,14 @@ export default function ChatPage() {
                   <span className="text-[#B51D2A]">.in</span>
                 </h2>
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                    className="mt-3 max-w-md flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#ffffff08] border border-[#ffffff05]"
-                  >
-                    <Sparkles className="h-3.5 w-3.5 text-[#B51D2A]" />
-                    <span className="text-xs font-medium text-gray-300/90">Powered by Groq & LLaMA 3 70B</span>
-                  </motion.div>
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="mt-3 max-w-md flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#ffffff08] border border-[#ffffff05]"
+                >
+                  <Sparkles className="h-3.5 w-3.5 text-[#B51D2A]" />
+                  <span className="text-xs font-medium text-gray-300/90">Powered by Groq & LLaMA 3 70B</span>
+                </motion.div>
               </motion.div>
             ) : (
               <AnimatePresence initial={false}>
