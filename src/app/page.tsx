@@ -52,22 +52,86 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen flex-col bg-[#0a0a0a] text-gray-100 overflow-hidden">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-800 bg-[#181818]/95 backdrop-blur-lg supports-[backdrop-filter]:bg-[#181818]/80">
+      {/* Enhanced Header */}
+      <header className="sticky top-0 z-10 border-b border-gray-800 bg-gradient-to-b from-[#181818] to-[#181818]/90 backdrop-blur-lg supports-[backdrop-filter]:bg-[#181818]/80">
         <div className="flex flex-col items-center justify-center py-4 px-5">
-          <h1 className="text-4xl font-bold tracking-tight"><span className="text-white">mumet</span>
-            <span className="text-[#B51D2A]">.in</span></h1>
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="relative"
+          >
+            <motion.h1 
+              className="text-4xl font-bold tracking-tight"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              transition={{
+                duration: 0.8,
+                type: "spring",
+                stiffness: 100,
+                damping: 10
+              }}
+            >
+              <motion.span 
+                className="text-white"
+                animate={{
+                  textShadow: [
+                    "0 0 0px rgba(255,255,255,0)",
+                    "0 0 5px rgba(255,255,255,0.2)",
+                    "0 0 0px rgba(255,255,255,0)"
+                  ]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }}
+              >
+                mumet
+              </motion.span>
+              <motion.span 
+                className="text-[#B51D2A]"
+                animate={{
+                  textShadow: [
+                    "0 0 0px rgba(181,29,42,0)",
+                    "0 0 8px rgba(181,29,42,0.5)",
+                    "0 0 0px rgba(181,29,42,0)"
+                  ]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  delay: 0.5
+                }}
+              >
+                .in
+              </motion.span>
+            </motion.h1>
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 0.3, duration: 0.8, type: "spring" }}
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#B51D2A] to-transparent opacity-70"
+            />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4, type: "spring" }}
             className="mt-3 max-w-md flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#ffffff08] border border-[#ffffff05]"
           >
-            <Sparkles className="h-3.5 w-3.5 text-[#B51D2A]" />
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            >
+              <Sparkles className="h-3.5 w-3.5 text-[#B51D2A]" />
+            </motion.div>
             <span className="text-xs font-medium text-gray-300/90">Powered by Groq & LLaMA 3 70B</span>
           </motion.div>
         </div>
       </header>
+
       {/* Chat Area */}
       <main className="flex-1 overflow-hidden relative">
         {/* Subtle grid pattern */}
@@ -103,17 +167,60 @@ export default function ChatPage() {
                     <Bot className="h-10 w-10 text-[#B51D2A]" />
                   </div>
                 </motion.div>
-                <h2 className="mt-8 text-3xl md:text-4xl font-bold tracking-tight">
-                  <span className="text-white">mumet</span>
-                  <span className="text-[#B51D2A]">.in</span>
-                </h2>
+                <motion.h2
+                  className="mt-8 text-3xl md:text-4xl font-bold tracking-tight"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <motion.span 
+                    className="text-white"
+                    animate={{
+                      textShadow: [
+                        "0 0 0px rgba(255,255,255,0)",
+                        "0 0 5px rgba(255,255,255,0.2)",
+                        "0 0 0px rgba(255,255,255,0)"
+                      ]
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      repeatType: "reverse"
+                    }}
+                  >
+                    mumet
+                  </motion.span>
+                  <motion.span 
+                    className="text-[#B51D2A]"
+                    animate={{
+                      textShadow: [
+                        "0 0 0px rgba(181,29,42,0)",
+                        "0 0 8px rgba(181,29,42,0.5)",
+                        "0 0 0px rgba(181,29,42,0)"
+                      ]
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                      delay: 0.5
+                    }}
+                  >
+                    .in
+                  </motion.span>
+                </motion.h2>
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
                   className="mt-3 max-w-md flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#ffffff08] border border-[#ffffff05]"
                 >
-                  <Sparkles className="h-3.5 w-3.5 text-[#B51D2A]" />
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Sparkles className="h-3.5 w-3.5 text-[#B51D2A]" />
+                  </motion.div>
                   <span className="text-xs font-medium text-gray-300/90">Powered by Groq & LLaMA 3 70B</span>
                 </motion.div>
               </motion.div>
