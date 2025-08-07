@@ -2,13 +2,17 @@
 'use client';
 
 import { useChat } from 'ai/react';
-import { Bot, User, Sparkles, CornerDownLeft, Copy, Check } from 'lucide-react';
+import { Bot, User, Sparkles, CornerDownLeft, Copy, Check, LogOut } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReactNode } from 'react';
+import Image from 'next/image';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import Login from '@/components/auth/login';
 
 type ReactMarkdownProps = {
   node?: unknown;
@@ -21,6 +25,8 @@ type CodeProps = ReactMarkdownProps & {
 };
 
 export default function ChatPage() {
+  const { user, loading: authLoading, signOut } = useAuth();
+  const router = useRouter();
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
     api: '/api/chat',
   });
@@ -29,8 +35,14 @@ export default function ChatPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   const handleCopyCode = (code: string, messageId: string) => {
     navigator.clipboard.writeText(code);
@@ -39,29 +51,44 @@ export default function ChatPage() {
   };
 
   const extractCodeFromChildren = (children: ReactNode): string => {
-    if (typeof children === 'string') return children;
+    if (typeof children === "string") return children;
     if (Array.isArray(children)) {
       return children.map(child => extractCodeFromChildren(child)).join('');
     }
-    if (children && typeof children === 'object' && 'props' in children) {
+    if (children && typeof children === "object" && "props" in children) {
       const propsChildren = children as { props?: { children?: ReactNode } };
       return extractCodeFromChildren(propsChildren.props?.children);
     }
     return '';
   };
 
+  if (authLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#0a0a0a]">
+        <div className="animate-pulse flex flex-col items-center">
+          <Bot className="h-12 w-12 text-[#B51D2A] mb-4" />
+          <p className="text-gray-400">Memuat...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Login />;
+  }
+
   return (
     <div className="flex h-screen flex-col bg-[#0a0a0a] text-gray-100 overflow-hidden">
       {/* Enhanced Header */}
       <header className="sticky top-0 z-10 border-b border-gray-800 bg-gradient-to-b from-[#181818] to-[#181818]/90 backdrop-blur-lg supports-[backdrop-filter]:bg-[#181818]/80">
-        <div className="flex flex-col items-center justify-center py-4 px-5">
+        <div className="container mx-auto flex items-center justify-between py-4 px-5">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="relative"
           >
-            <motion.h1 
+            <motion.h1
               className="text-4xl font-bold tracking-tight"
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
@@ -72,7 +99,7 @@ export default function ChatPage() {
                 damping: 10
               }}
             >
-              <motion.span 
+              <motion.span
                 className="text-white"
                 animate={{
                   textShadow: [
@@ -89,7 +116,7 @@ export default function ChatPage() {
               >
                 mumet
               </motion.span>
-              <motion.span 
+              <motion.span
                 className="text-[#B51D2A]"
                 animate={{
                   textShadow: [
@@ -108,27 +135,38 @@ export default function ChatPage() {
                 .in
               </motion.span>
             </motion.h1>
-            <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ delay: 0.3, duration: 0.8, type: "spring" }}
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#B51D2A] to-transparent opacity-70"
-            />
           </motion.div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4, type: "spring" }}
-            className="mt-3 max-w-md flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#ffffff08] border border-[#ffffff05]"
-          >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+
+          <div className="flex items-center gap-4">
+            {user && (
+              <div className="flex items-center gap-2">
+                {user.photoURL ? (
+                  <Image
+                    src={user.photoURL}
+                    alt="Profile"
+                    width={42}
+                    height={42}
+                    className="rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-[#B51D2A] flex items-center justify-center text-white">
+                    {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
+                <span className="text-sm font-medium text-gray-300">
+                  {user.displayName || 'User'}
+                </span>
+              </div>
+            )}
+            <Button
+              onClick={signOut}
+              variant="outline"
+              size="sm"
+              className="text-gray-400 hover:text-white hover:bg-[#ffffff10]"
             >
-              <Sparkles className="h-3.5 w-3.5 text-[#B51D2A]" />
-            </motion.div>
-            <span className="text-xs font-medium text-gray-300/90">Powered by Groq & LLaMA 3 70B</span>
-          </motion.div>
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -173,7 +211,7 @@ export default function ChatPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <motion.span 
+                  <motion.span
                     className="text-white"
                     animate={{
                       textShadow: [
@@ -190,7 +228,7 @@ export default function ChatPage() {
                   >
                     mumet
                   </motion.span>
-                  <motion.span 
+                  <motion.span
                     className="text-[#B51D2A]"
                     animate={{
                       textShadow: [
