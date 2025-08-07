@@ -8,12 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { FcGoogle } from 'react-icons/fc';
+import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Register() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
@@ -35,6 +37,8 @@ export default function Register() {
             } else {
                 setError('Terjadi kesalahan tidak dikenal.');
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -51,7 +55,13 @@ export default function Register() {
             } else {
                 setError('Terjadi kesalahan tidak dikenal.');
             }
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
     };
 
     return (
@@ -124,20 +134,31 @@ export default function Register() {
                         />
                     </div>
 
-                    <div>
+                    <div className="relative">
                         <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
                             Password
                         </label>
                         <Input
                             id="password"
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
-                            className="w-full bg-[#0a0a0a] border border-[#ffffff08] text-white"
+                            className="w-full bg-[#0a0a0a] border border-[#ffffff08] text-white pr-10"
                             required
                             minLength={6}
                         />
+                        <button
+                            type="button"
+                            className="absolute right-3 top-9 text-gray-400 hover:text-gray-300 opacity-40"
+                            onClick={togglePasswordVisibility}
+                        >
+                            {showPassword ? (
+                                <EyeOff className="h-6 w-6" />
+                            ) : (
+                                <Eye className="h-6 w-6" />
+                            )}
+                        </button>
                     </div>
 
                     <Button
