@@ -2,7 +2,7 @@
 'use client';
 
 import { useChat } from 'ai/react';
-import { Bot, User, Sparkles, CornerDownLeft, Copy, Check, LogOut } from 'lucide-react';
+import { Bot, User, Sparkles, CornerDownLeft, Copy, Check, LogOut, X, Menu } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,25 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isHoveringSend, setIsHoveringSend] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleConfirmLogout = () => {
+    setShowLogoutModal(false);
+    signOut();
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutModal(false);
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -80,95 +99,199 @@ export default function ChatPage() {
   return (
     <div className="flex h-screen flex-col bg-[#0a0a0a] text-gray-100 overflow-hidden">
       {/* Enhanced Header */}
-      <header className="sticky top-0 z-10 border-b border-gray-800 bg-gradient-to-b from-[#181818] to-[#181818]/90 backdrop-blur-lg supports-[backdrop-filter]:bg-[#181818]/80">
-        <div className="container mx-auto flex items-center justify-between py-4 px-5">
+      <header className="sticky top-0 z-50 border-b border-gray-800 bg-gradient-to-b from-[#0f0f0f] to-[#0f0f0f]/95 backdrop-blur-xl supports-[backdrop-filter]:bg-[#0f0f0f]/90">
+        <div className="container mx-auto flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+          {/* Logo */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="relative"
+            className="flex items-center"
           >
-            <motion.h1
-              className="text-4xl font-bold tracking-tight"
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{
-                duration: 0.8,
-                type: "spring",
-                stiffness: 100,
-                damping: 10
-              }}
+            <motion.a
+              href="/"
+              className="flex items-center space-x-1"
             >
-              <motion.span
-                className="text-white"
-                animate={{
-                  textShadow: [
-                    "0 0 0px rgba(255,255,255,0)",
-                    "0 0 5px rgba(255,255,255,0.2)",
-                    "0 0 0px rgba(255,255,255,0)"
-                  ]
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatType: "reverse"
-                }}
+              <motion.h1
+                className="text-3xl font-bold tracking-tighter sm:text-4xl"
               >
-                mumet
-              </motion.span>
-              <motion.span
-                className="text-[#B51D2A]"
-                animate={{
-                  textShadow: [
-                    "0 0 0px rgba(181,29,42,0)",
-                    "0 0 8px rgba(181,29,42,0.5)",
-                    "0 0 0px rgba(181,29,42,0)"
-                  ]
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                  delay: 0.5
-                }}
-              >
-                .in
-              </motion.span>
-            </motion.h1>
+                <motion.span
+                  className="text-white"
+                  animate={{
+                    textShadow: [
+                      "0 0 0px rgba(255,255,255,0)",
+                      "0 0 5px rgba(255,255,255,0.2)",
+                      "0 0 0px rgba(255,255,255,0)"
+                    ]
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    repeatType: "reverse"
+                  }}
+                >
+                  mumet
+                </motion.span>
+                <motion.span
+                  className="text-[#B51D2A]"
+                  animate={{
+                    textShadow: [
+                      "0 0 0px rgba(181,29,42,0)",
+                      "0 0 8px rgba(181,29,42,0.5)",
+                      "0 0 0px rgba(181,29,42,0)"
+                    ]
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    delay: 0.5
+                  }}
+                >
+                  .in
+                </motion.span>
+              </motion.h1>
+            </motion.a>
           </motion.div>
 
-          <div className="flex items-center gap-4">
+          <div className="hidden items-center gap-4 sm:flex">
             {user && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {user.photoURL ? (
                   <Image
                     src={user.photoURL}
                     alt="Profile"
-                    width={42}
-                    height={42}
-                    className="rounded-full object-cover"
+                    width={44}
+                    height={44}
+                    className="rounded-full border-2 border-[#B51D2A]/30 object-cover transition-all hover:border-[#B51D2A]/60"
                   />
                 ) : (
-                  <div className="h-8 w-8 rounded-full bg-[#B51D2A] flex items-center justify-center text-white">
-                    {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#B51D2A] to-[#E53935] text-white shadow-md">
+                    <span className="text-lg font-medium">
+                      {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                    </span>
                   </div>
                 )}
-                <span className="text-sm font-medium text-gray-300">
+                <h3 className="text-sm font-semibold text-gray-100">
                   {user.displayName || 'User'}
-                </span>
+                </h3>
               </div>
             )}
+
             <Button
-              onClick={signOut}
+              onClick={handleLogoutClick}
               variant="outline"
               size="sm"
-              className="text-gray-400 hover:text-white hover:bg-[#ffffff10]"
+              className="group rounded-full bg-[#ffffff08] px-3 text-gray-300 shadow-sm transition-all hover:bg-[#B51D2A]/20 hover:text-white"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+              <span className="text-sm">Logout</span>
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-2 sm:hidden">
+            <Button
+              onClick={toggleMobileMenu}
+              variant="outline"
+              size="sm"
+              className="rounded-full bg-[#ffffff08] p-2 text-gray-300"
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
           </div>
         </div>
+
+        {isMobileMenuOpen && (
+          <div className="container mx-auto border-t border-gray-800 px-4 py-3 sm:hidden">
+            <div className="flex flex-col space-y-4">
+              {user && (
+                <div className="flex items-center gap-3">
+                  {user.photoURL ? (
+                    <Image
+                      src={user.photoURL}
+                      alt="Profile"
+                      width={40}
+                      height={40}
+                      className="rounded-full border-2 border-[#B51D2A]/30 object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#B51D2A] to-[#E53935] text-white">
+                      <span className="text-base font-medium">
+                        {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-gray-100">
+                      {user.displayName || 'User'}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {user.email || ''}
+                    </span>
+                  </div>
+                </div>
+              )}
+              <Button
+                onClick={handleLogoutClick}
+                variant="outline"
+                className="mt-2 w-full justify-start px-3 py-2 text-[#B51D2A] hover:bg-[#B51D2A]/10"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        )}
       </header>
+
+      {/* Logout Confirmation Modal */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="relative w-full max-w-md rounded-xl bg-[#0f0f0f] border border-[#ffffff08] p-6 shadow-2xl"
+            >
+              <div className="space-y-4">
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-white">
+                    Konfirmasi Logout
+                  </h3>
+                  <p className="mt-2 text-gray-400">
+                    Apakah kamu ingin Logout dari mumet.in sebagai {user.email}?
+                  </p>
+                </div>
+                <div className="flex justify-center gap-3 pt-4">
+                  <Button
+                    onClick={handleCancelLogout}
+                    variant="outline"
+                    className="px-6 bg-[#ffffff08] hover:bg-[#ffffff15] text-white"
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    onClick={handleConfirmLogout}
+                    className="px-6 bg-[#B51D2A] hover:bg-[#B51D2A]/90 text-white"
+                  >
+                    Logout
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Chat Area */}
       <main className="flex-1 overflow-hidden relative">
