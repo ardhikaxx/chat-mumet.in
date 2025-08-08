@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useChat } from 'ai/react';
@@ -161,8 +160,8 @@ export default function ChatPage() {
                   <Image
                     src={user.photoURL}
                     alt="Profile"
-                    width={44}
-                    height={44}
+                    width={42}
+                    height={42}
                     className="rounded-full border-2 border-[#B51D2A]/30 object-cover transition-all hover:border-[#B51D2A]/60"
                   />
                 ) : (
@@ -172,9 +171,14 @@ export default function ChatPage() {
                     </span>
                   </div>
                 )}
-                <h3 className="text-sm font-semibold text-gray-100">
-                  {user.displayName || 'User'}
-                </h3>
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold text-gray-100">
+                    {user.displayName || 'User'}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    {user.email || ''}
+                  </span>
+                </div>
               </div>
             )}
 
@@ -214,13 +218,14 @@ export default function ChatPage() {
                     <Image
                       src={user.photoURL}
                       alt="Profile"
-                      width={40}
-                      height={40}
-                      className="rounded-full border-2 border-[#B51D2A]/30 object-cover"
+                      width={44}
+                      height={44}
+                      className="rounded-full border-2 border-[#B51D2A]/30 object-cover transition-all hover:border-[#B51D2A]/60"
+                      unoptimized={process.env.NODE_ENV !== 'production'}
                     />
                   ) : (
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#B51D2A] to-[#E53935] text-white">
-                      <span className="text-base font-medium">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#B51D2A] to-[#E53935] text-white shadow-md">
+                      <span className="text-lg font-medium">
                         {user.displayName?.charAt(0).toUpperCase() || 'U'}
                       </span>
                     </div>
@@ -413,7 +418,7 @@ export default function ChatPage() {
                         <div className="prose prose-invert max-w-none break-words text-sm md:text-[0.925rem] leading-relaxed">
                           <ReactMarkdown
                             components={{
-                              pre: ({ node, children }: ReactMarkdownProps) => {
+                              pre: ({ children }: ReactMarkdownProps) => {
                                 const codeContent = extractCodeFromChildren(children);
                                 return (
                                   <div className="relative my-3 w-full overflow-x-auto rounded-lg bg-[#0a0a0a] border border-[#ffffff08] p-3 shadow-inner">
@@ -432,14 +437,14 @@ export default function ChatPage() {
                                   </div>
                                 );
                               },
-                              code: ({ node, className, children, inline }: CodeProps) => (
+                              code: ({ className, children }: CodeProps) => (
                                 <code
                                   className={`rounded bg-[#0a0a0a] px-1.5 py-0.5 text-xs md:text-sm border border-[#ffffff08] ${className || ''}`}
                                 >
                                   {children}
                                 </code>
                               ),
-                              a: ({ node, children, ...props }: ReactMarkdownProps) => (
+                              a: ({ children, ...props }: ReactMarkdownProps) => (
                                 <a
                                   className="text-[#B51D2A] hover:underline underline-offset-4"
                                   {...props}
@@ -447,24 +452,24 @@ export default function ChatPage() {
                                   {children}
                                 </a>
                               ),
-                              blockquote: ({ node, children }: ReactMarkdownProps) => (
+                              blockquote: ({ children }: ReactMarkdownProps) => (
                                 <blockquote
                                   className="border-l-4 border-[#B51D2A] pl-4 text-gray-300 my-3 italic"
                                 >
                                   {children}
                                 </blockquote>
                               ),
-                              ul: ({ node, children }: ReactMarkdownProps) => (
+                              ul: ({ children }: ReactMarkdownProps) => (
                                 <ul className="list-disc pl-5 space-y-1 marker:text-[#B51D2A]">
                                   {children}
                                 </ul>
                               ),
-                              ol: ({ node, children }: ReactMarkdownProps) => (
+                              ol: ({ children }: ReactMarkdownProps) => (
                                 <ol className="list-decimal pl-5 space-y-1 marker:text-[#B51D2A]">
                                   {children}
                                 </ol>
                               ),
-                              p: ({ node, children }: ReactMarkdownProps) => (
+                              p: ({ children }: ReactMarkdownProps) => (
                                 <p className="my-2 leading-relaxed">
                                   {children}
                                 </p>

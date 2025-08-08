@@ -2,73 +2,83 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword, signInWithPopup, updateProfile, AuthProvider } from 'firebase/auth';
-import { auth, googleProvider, githubProvider } from '@/lib/firebase/config';
+import { createUserWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
+import { auth, provider } from '@/lib/firebase/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { FcGoogle } from 'react-icons/fc';
-import { FaGithub } from 'react-icons/fa';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
-
-interface FirebaseError extends Error {
-    code: string;
-    customData?: {
-        email?: string;
-    };
-}
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { FirebaseError } from 'firebase/app';
 
 export default function Register() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+
+    const getErrorMessage = (errorCode: string) => {
+        switch (errorCode) {
+            case 'auth/email-already-in-use':
+                return 'Email sudah digunakan';
+            case 'auth/invalid-email':
+                return 'Email tidak valid';
+            case 'auth/weak-password':
+                return 'Password terlalu lemah (minimal 6 karakter)';
+            case 'auth/operation-not-allowed':
+                return 'Operasi tidak diizinkan';
+            case 'auth/network-request-failed':
+                return 'Gagal terhubung ke jaringan';
+            case 'auth/popup-closed-by-user':
+                return 'Pendaftaran dengan Google dibatalkan';
+            case 'auth/invalid-credential':
+                return 'Kredensial tidak valid';
+            default:
+                return 'Terjadi kesalahan saat mendaftar';
+        }
+    };
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
 
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(userCredential.user, {
                 displayName: name
             });
+            toast.success('Pendaftaran berhasil!');
             router.push('/');
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message);
+        } catch (error) {
+            if (error instanceof FirebaseError) {
+                const errorMessage = getErrorMessage(error.code);
+                toast.error(errorMessage);
             } else {
-                setError('Terjadi kesalahan tidak dikenal.');
+                toast.error('Terjadi kesalahan yang tidak diketahui');
             }
         } finally {
             setLoading(false);
         }
     };
 
-    const handleProviderRegister = async (provider: AuthProvider) => {
+    const handleGoogleRegister = async () => {
         setLoading(true);
-        setError('');
 
         try {
             await signInWithPopup(auth, provider);
+            toast.success('Pendaftaran dengan Google berhasil!');
             router.push('/');
-        } catch (error: unknown) {
-            if (isFirebaseError(error) && error.code === 'auth/account-exists-with-different-credential') {
-                const errorEmail = error.customData?.email;
-                if (errorEmail) {
-                    setError(`Akun sudah ada dengan email ${errorEmail}. Silakan login menggunakan metode yang sudah ada terlebih dahulu, lalu tautkan akun di pengaturan profil Anda.`);
-                } else {
-                    setError('Akun sudah ada dengan penyedia lain. Silakan login menggunakan metode yang sudah ada terlebih dahulu.');
-                }
-            } else if (error instanceof Error) {
-                setError(error.message || 'An error occurred during registration');
+        } catch (error) {
+            if (error instanceof FirebaseError) {
+                const errorMessage = getErrorMessage(error.code);
+                toast.error(errorMessage);
             } else {
-                setError('An unknown error occurred');
+                toast.error('Terjadi kesalahan yang tidak diketahui');
             }
         } finally {
             setLoading(false);
@@ -79,13 +89,21 @@ export default function Register() {
         setShowPassword(!showPassword);
     };
 
-    // Type guard for FirebaseError
-    function isFirebaseError(error: unknown): error is FirebaseError {
-        return error instanceof Error && 'code' in error;
-    }
-
     return (
         <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] p-4">
+            <ToastContainer
+                position="top-center"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+                toastStyle={{ backgroundColor: '#0f0f0f', border: '1px solid #ffffff08' }}
+            />
             <motion.div
                 animate={{
                     scale: [1, 1.01, 1],
@@ -106,7 +124,7 @@ export default function Register() {
                     transition={{ duration: 0.5 }}
                     className="relative w-full rounded-2xl bg-[#0f0f0f] border border-[#ffffff08] p-8 shadow-lg"
                 >
-                    <div className="text-center mb-4 text-white">
+                    <div className="text-center mb-8 text-white">
                         <motion.h1
                             className="text-3xl font-bold mb-2"
                             animate={{
@@ -126,16 +144,6 @@ export default function Register() {
                         </motion.h1>
                         <p className="text-gray-400">Buat akun baru</p>
                     </div>
-
-                    {error && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="mb-2 p-3 bg-red-900/30 border border-red-700 rounded-lg text-red-300 text-sm"
-                        >
-                            {error}
-                        </motion.div>
-                    )}
 
                     <form onSubmit={handleRegister} className="space-y-4">
                         <div>
@@ -213,27 +221,15 @@ export default function Register() {
                         </div>
                     </div>
 
-                    <div className="space-y-3">
-                        <Button
-                            onClick={() => handleProviderRegister(googleProvider)}
-                            variant="outline"
-                            className="w-full bg-[#0a0a0a] border border-[#ffffff08] text-white hover:bg-[#1a1a1a]"
-                            disabled={loading}
-                        >
-                            <FcGoogle className="mr-2 h-4 w-4" />
-                            Continue with Google
-                        </Button>
-
-                        <Button
-                            onClick={() => handleProviderRegister(githubProvider)}
-                            variant="outline"
-                            className="w-full bg-[#0a0a0a] border border-[#ffffff08] text-white hover:bg-[#1a1a1a]"
-                            disabled={loading}
-                        >
-                            <FaGithub className="mr-2 h-4 w-4" />
-                            Continue with GitHub
-                        </Button>
-                    </div>
+                    <Button
+                        onClick={handleGoogleRegister}
+                        variant="outline"
+                        className="w-full bg-[#0a0a0a] border border-[#ffffff08] text-white hover:bg-[#1a1a1a]"
+                        disabled={loading}
+                    >
+                        <FcGoogle className="mr-2 h-4 w-4" />
+                        Continue with Google
+                    </Button>
 
                     <p className="mt-6 text-center text-sm text-gray-400">
                         Sudah punya akun?{' '}
