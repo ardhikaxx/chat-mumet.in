@@ -2,14 +2,22 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword, signInWithPopup, updateProfile } from 'firebase/auth';
-import { auth, provider } from '@/lib/firebase/config';
+import { createUserWithEmailAndPassword, signInWithPopup, updateProfile, AuthProvider } from 'firebase/auth';
+import { auth, googleProvider, githubProvider } from '@/lib/firebase/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { FcGoogle } from 'react-icons/fc';
+import { FaGithub } from 'react-icons/fa';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+
+interface FirebaseError extends Error {
+    code: string;
+    customData?: {
+        email?: string;
+    };
+}
 
 export default function Register() {
     const [name, setName] = useState('');
@@ -42,18 +50,25 @@ export default function Register() {
         }
     };
 
-    const handleGoogleRegister = async () => {
+    const handleProviderRegister = async (provider: AuthProvider) => {
         setLoading(true);
         setError('');
 
         try {
             await signInWithPopup(auth, provider);
             router.push('/');
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message);
+        } catch (error: unknown) {
+            if (isFirebaseError(error) && error.code === 'auth/account-exists-with-different-credential') {
+                const errorEmail = error.customData?.email;
+                if (errorEmail) {
+                    setError(`Akun sudah ada dengan email ${errorEmail}. Silakan login menggunakan metode yang sudah ada terlebih dahulu, lalu tautkan akun di pengaturan profil Anda.`);
+                } else {
+                    setError('Akun sudah ada dengan penyedia lain. Silakan login menggunakan metode yang sudah ada terlebih dahulu.');
+                }
+            } else if (error instanceof Error) {
+                setError(error.message || 'An error occurred during registration');
             } else {
-                setError('Terjadi kesalahan tidak dikenal.');
+                setError('An unknown error occurred');
             }
         } finally {
             setLoading(false);
@@ -63,6 +78,11 @@ export default function Register() {
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
+
+    // Type guard for FirebaseError
+    function isFirebaseError(error: unknown): error is FirebaseError {
+        return error instanceof Error && 'code' in error;
+    }
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] p-4">
@@ -86,7 +106,7 @@ export default function Register() {
                     transition={{ duration: 0.5 }}
                     className="relative w-full rounded-2xl bg-[#0f0f0f] border border-[#ffffff08] p-8 shadow-lg"
                 >
-                    <div className="text-center mb-8 text-white">
+                    <div className="text-center mb-4 text-white">
                         <motion.h1
                             className="text-3xl font-bold mb-2"
                             animate={{
@@ -111,7 +131,7 @@ export default function Register() {
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="mb-4 p-3 bg-red-900/30 border border-red-700 rounded-lg text-red-300 text-sm"
+                            className="mb-2 p-3 bg-red-900/30 border border-red-700 rounded-lg text-red-300 text-sm"
                         >
                             {error}
                         </motion.div>
@@ -193,15 +213,27 @@ export default function Register() {
                         </div>
                     </div>
 
-                    <Button
-                        onClick={handleGoogleRegister}
-                        variant="outline"
-                        className="w-full bg-[#0a0a0a] border border-[#ffffff08] text-white hover:bg-[#1a1a1a]"
-                        disabled={loading}
-                    >
-                        <FcGoogle className="mr-2 h-4 w-4" />
-                        Continue with Google
-                    </Button>
+                    <div className="space-y-3">
+                        <Button
+                            onClick={() => handleProviderRegister(googleProvider)}
+                            variant="outline"
+                            className="w-full bg-[#0a0a0a] border border-[#ffffff08] text-white hover:bg-[#1a1a1a]"
+                            disabled={loading}
+                        >
+                            <FcGoogle className="mr-2 h-4 w-4" />
+                            Continue with Google
+                        </Button>
+
+                        <Button
+                            onClick={() => handleProviderRegister(githubProvider)}
+                            variant="outline"
+                            className="w-full bg-[#0a0a0a] border border-[#ffffff08] text-white hover:bg-[#1a1a1a]"
+                            disabled={loading}
+                        >
+                            <FaGithub className="mr-2 h-4 w-4" />
+                            Continue with GitHub
+                        </Button>
+                    </div>
 
                     <p className="mt-6 text-center text-sm text-gray-400">
                         Sudah punya akun?{' '}

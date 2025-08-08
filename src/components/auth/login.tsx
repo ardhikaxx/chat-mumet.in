@@ -2,14 +2,22 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { auth, provider } from '@/lib/firebase/config';
+import { signInWithEmailAndPassword, signInWithPopup, AuthProvider } from 'firebase/auth';
+import { auth, googleProvider, githubProvider } from '@/lib/firebase/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { FcGoogle } from 'react-icons/fc';
+import { FaGithub } from 'react-icons/fa';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+
+interface FirebaseError extends Error {
+    code: string;
+    customData?: {
+        email?: string;
+    };
+}
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -38,18 +46,25 @@ export default function Login() {
         }
     };
 
-    const handleGoogleLogin = async () => {
+    const handleProviderLogin = async (provider: AuthProvider) => {
         setLoading(true);
         setError('');
 
         try {
             await signInWithPopup(auth, provider);
             router.push('/');
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message);
+        } catch (error: unknown) {
+            if (isFirebaseError(error) && error.code === 'auth/account-exists-with-different-credential') {
+                const errorEmail = error.customData?.email;
+                if (errorEmail) {
+                    setError(`Akun sudah ada dengan email ${errorEmail}. Silakan login menggunakan metode yang sudah ada terlebih dahulu, lalu tautkan akun di pengaturan profil Anda.`);
+                } else {
+                    setError('Akun sudah ada dengan penyedia lain. Silakan login menggunakan metode yang sudah ada terlebih dahulu.');
+                }
+            } else if (error instanceof Error) {
+                setError(error.message || 'An error occurred during login');
             } else {
-                setError('An unknown error occurred during Google login');
+                setError('An unknown error occurred');
             }
         } finally {
             setLoading(false);
@@ -59,6 +74,11 @@ export default function Login() {
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
+
+    // Type guard for FirebaseError
+    function isFirebaseError(error: unknown): error is FirebaseError {
+        return error instanceof Error && 'code' in error;
+    }
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] p-4">
@@ -82,7 +102,7 @@ export default function Login() {
                     transition={{ duration: 0.5 }}
                     className="relative w-full max-w-md rounded-2xl bg-[#0f0f0f] border border-[#ffffff08] p-8 shadow-lg"
                 >
-                    <div className="text-center mb-8">
+                    <div className="text-center mb-4">
                         <motion.h1
                             className="text-3xl font-bold mb-2 text-white"
                             animate={{
@@ -107,7 +127,7 @@ export default function Login() {
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="mb-4 p-3 bg-red-900/30 border border-red-700 rounded-lg text-red-300 text-sm"
+                            className="mb-2 p-3 bg-red-900/30 border border-red-700 rounded-lg text-red-300 text-sm"
                         >
                             {error}
                         </motion.div>
@@ -173,15 +193,27 @@ export default function Login() {
                         </div>
                     </div>
 
-                    <Button
-                        onClick={handleGoogleLogin}
-                        variant="outline"
-                        className="w-full bg-[#0a0a0a] border border-[#ffffff08] text-white hover:bg-[#1a1a1a]"
-                        disabled={loading}
-                    >
-                        <FcGoogle className="mr-2 h-4 w-4" />
-                        Continue with Google
-                    </Button>
+                    <div className="space-y-3">
+                        <Button
+                            onClick={() => handleProviderLogin(googleProvider)}
+                            variant="outline"
+                            className="w-full bg-[#0a0a0a] border border-[#ffffff08] text-white hover:bg-[#1a1a1a]"
+                            disabled={loading}
+                        >
+                            <FcGoogle className="mr-2 h-4 w-4" />
+                            Continue with Google
+                        </Button>
+
+                        <Button
+                            onClick={() => handleProviderLogin(githubProvider)}
+                            variant="outline"
+                            className="w-full bg-[#0a0a0a] border border-[#ffffff08] text-white hover:bg-[#1a1a1a]"
+                            disabled={loading}
+                        >
+                            <FaGithub className="mr-2 h-4 w-4" />
+                            Continue with GitHub
+                        </Button>
+                    </div>
 
                     <p className="mt-6 text-center text-sm text-gray-400">
                         Belum punya akun?{' '}
