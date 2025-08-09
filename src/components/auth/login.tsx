@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FirebaseError } from 'firebase/app';
+import MumetIcon from '@/components/icon/icon';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -127,24 +128,10 @@ export default function Login() {
                     className="relative w-full max-w-md rounded-2xl bg-[#0f0f0f] border border-[#ffffff08] p-8 shadow-lg"
                 >
                     <div className="text-center mb-8">
-                        <motion.h1
-                            className="text-3xl font-bold mb-2 text-white"
-                            animate={{
-                                textShadow: [
-                                    "0 0 0px rgba(255,255,255,0)",
-                                    "0 0 5px rgba(255,255,255,0.2)",
-                                    "0 0 0px rgba(255,255,255,0)"
-                                ]
-                            }}
-                            transition={{
-                                duration: 3,
-                                repeat: Infinity,
-                                repeatType: "reverse"
-                            }}
-                        >
-                            mumet<span className="text-[#B51D2A]">.in</span>
-                        </motion.h1>
-                        <p className="text-gray-400">Login untuk melanjutkan ke chat</p>
+                        <div className="flex justify-center">
+                            <MumetIcon size={175} />
+                        </div>
+                        <p className="text-gray-400 mt-3">Login untuk melanjutkan ke chat</p>
                     </div>
 
                     <form onSubmit={handleLogin} className="space-y-4">

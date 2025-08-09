@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Login from '@/components/auth/login';
+import MumetIcon from '@/components/icon/icon';
 
 type ReactMarkdownProps = {
   node?: unknown;
@@ -107,49 +108,9 @@ export default function ChatPage() {
             transition={{ duration: 0.5 }}
             className="flex items-center"
           >
-            <motion.a
-              href="/"
-              className="flex items-center space-x-1"
+            <motion.a href="/" className="flex items-center space-x-1"
             >
-              <motion.h1
-                className="text-3xl font-bold tracking-tighter sm:text-4xl"
-              >
-                <motion.span
-                  className="text-white"
-                  animate={{
-                    textShadow: [
-                      "0 0 0px rgba(255,255,255,0)",
-                      "0 0 5px rgba(255,255,255,0.2)",
-                      "0 0 0px rgba(255,255,255,0)"
-                    ]
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    repeatType: "reverse"
-                  }}
-                >
-                  mumet
-                </motion.span>
-                <motion.span
-                  className="text-[#B51D2A]"
-                  animate={{
-                    textShadow: [
-                      "0 0 0px rgba(181,29,42,0)",
-                      "0 0 8px rgba(181,29,42,0.5)",
-                      "0 0 0px rgba(181,29,42,0)"
-                    ]
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    delay: 0.5
-                  }}
-                >
-                  .in
-                </motion.span>
-              </motion.h1>
+              <MumetIcon size={145} />
             </motion.a>
           </motion.div>
 
@@ -333,48 +294,9 @@ export default function ChatPage() {
                     <Bot className="h-10 w-10 text-[#B51D2A]" />
                   </div>
                 </motion.div>
-                <motion.h2
-                  className="mt-8 text-3xl md:text-4xl font-bold tracking-tight"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <motion.span
-                    className="text-white"
-                    animate={{
-                      textShadow: [
-                        "0 0 0px rgba(255,255,255,0)",
-                        "0 0 5px rgba(255,255,255,0.2)",
-                        "0 0 0px rgba(255,255,255,0)"
-                      ]
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      repeatType: "reverse"
-                    }}
-                  >
-                    mumet
-                  </motion.span>
-                  <motion.span
-                    className="text-[#B51D2A]"
-                    animate={{
-                      textShadow: [
-                        "0 0 0px rgba(181,29,42,0)",
-                        "0 0 8px rgba(181,29,42,0.5)",
-                        "0 0 0px rgba(181,29,42,0)"
-                      ]
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      repeatType: "reverse",
-                      delay: 0.5
-                    }}
-                  >
-                    .in
-                  </motion.span>
-                </motion.h2>
+                <div className="flex justify-center mt-5">
+                  <MumetIcon size={158} />
+                </div>
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
