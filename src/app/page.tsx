@@ -13,6 +13,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Login from '@/components/auth/login';
 import MumetIcon from '@/components/icon/icon';
+import LetterGlitch from '@/components/LetterGlitch';
 
 type ReactMarkdownProps = {
   node?: unknown;
@@ -97,7 +98,14 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-[#0a0a0a] text-gray-100 overflow-hidden">
+    <div className="flex h-screen flex-col bg-[#0a0a0a] text-gray-100 overflow-hidden relative">
+      <LetterGlitch
+        glitchSpeed={50}
+        centerVignette={true}
+        outerVignette={false}
+        smooth={true}
+        glitchColors={["#1a0a0a", "#B51D2A", "#8e1620"]}
+      />
       {/* Enhanced Header */}
       <header className="sticky top-0 z-50 border-b border-gray-800 bg-gradient-to-b from-[#0f0f0f] to-[#0f0f0f]/95 backdrop-blur-xl supports-[backdrop-filter]:bg-[#0f0f0f]/90">
         <div className="container mx-auto flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
@@ -260,7 +268,7 @@ export default function ChatPage() {
       </AnimatePresence>
 
       {/* Chat Area */}
-      <main className="flex-1 overflow-hidden relative">
+      <main className="flex-1 overflow-hidden relative z-10">
         {/* Subtle grid pattern */}
         <div className="absolute inset-0 opacity-5 [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent_100%)]">
           <div className="h-full w-full [background-repeat:repeat] [background-size:60px_60px] [background-image:linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)]"></div>
@@ -421,7 +429,7 @@ export default function ChatPage() {
       </main>
 
       {/* Floating Input Area */}
-      <div className="sticky bottom-0 pb-6 pt-2 px-4 bg-gradient-to-t from-[#0a0a0a]/90 via-[#0a0a0a]/70 to-transparent">
+      <div className="sticky bottom-0 pb-6 pt-2 px-4 bg-gradient-to-t from-[#0a0a0a]/90 via-[#0a0a0a]/70 to-transparent z-10">
         <motion.form
           onSubmit={handleSubmit}
           className="mx-auto max-w-4xl relative"
