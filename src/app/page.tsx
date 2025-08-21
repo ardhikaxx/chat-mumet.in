@@ -1,8 +1,8 @@
 'use client';
 
 import { useChat } from 'ai/react';
-import { Bot, User, Sparkles, CornerDownLeft, Copy, Check, LogOut, X, Menu, ArrowDown } from 'lucide-react';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { Bot, User, Sparkles, CornerDownLeft, Copy, Check, LogOut, X, Menu } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ReactMarkdown from 'react-markdown';
@@ -32,18 +32,10 @@ export default function ChatPage() {
     api: '/api/chat',
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
   const [isHoveringSend, setIsHoveringSend] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const userScrolledUpRef = useRef(false);
-  const lastMessageCountRef = useRef(0);
-  const isFirstLoadRef = useRef(true);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const lastContentHeightRef = useRef(0);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -62,175 +54,9 @@ export default function ChatPage() {
     setShowLogoutModal(false);
   };
 
-  // Fungsi untuk scroll ke bottom
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior });
-    }
-  }, []);
-
-  // Fungsi untuk scroll ke bottom dengan animasi custom
-  const smoothScrollToBottom = useCallback(() => {
-    if (!chatContainerRef.current) return;
-    
-    const container = chatContainerRef.current;
-    const targetPosition = container.scrollHeight - container.clientHeight;
-    const startPosition = container.scrollTop;
-    const distance = targetPosition - startPosition;
-    
-    // Jika jaraknya kecil, langsung scroll tanpa animasi
-    if (Math.abs(distance) < 50) {
-      container.scrollTop = targetPosition;
-      return;
-    }
-    
-    const duration = Math.min(800, Math.max(300, Math.abs(distance) * 0.5));
-    
-    let startTime: number | null = null;
-    
-    const animateScroll = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const timeElapsed = currentTime - startTime;
-      const progress = Math.min(timeElapsed / duration, 1);
-      
-      // Menggunakan easing function untuk animasi yang lebih smooth
-      const easeOutQuart = (t: number) => {
-        return 1 - Math.pow(1 - t, 4);
-      };
-      
-      const scrollAmount = startPosition + distance * easeOutQuart(progress);
-      container.scrollTop = scrollAmount;
-      
-      if (timeElapsed < duration) {
-        requestAnimationFrame(animateScroll);
-      }
-    };
-    
-    requestAnimationFrame(animateScroll);
-  }, []);
-
-  // Fungsi untuk memeriksa apakah konten baru ditambahkan dan perlu di-scroll
-  const checkForNewContentAndScroll = useCallback(() => {
-    if (!chatContainerRef.current || userScrolledUpRef.current) return;
-    
-    const container = chatContainerRef.current;
-    const currentContentHeight = container.scrollHeight;
-    
-    // Jika ada konten baru yang ditambahkan
-    if (currentContentHeight > lastContentHeightRef.current) {
-      lastContentHeightRef.current = currentContentHeight;
-      smoothScrollToBottom();
-    }
-  }, [smoothScrollToBottom]);
-
-  // Efek untuk scroll otomatis ketika ada pesan baru dari AI
   useEffect(() => {
-    if (messages.length === 0) return;
-    
-    const lastMessage = messages[messages.length - 1];
-    const isLastMessageFromAI = lastMessage.role === 'assistant';
-    const isNewMessage = messages.length > lastMessageCountRef.current;
-    
-    if (isNewMessage) {
-      lastMessageCountRef.current = messages.length;
-      
-      // Jika ini pertama kali load atau user tidak sedang scroll ke atas, lakukan auto-scroll
-      if (isFirstLoadRef.current || (!userScrolledUpRef.current && isLastMessageFromAI)) {
-        // Gunakan timeout untuk memastikan DOM sudah di-render
-        const timer = setTimeout(() => {
-          if (isFirstLoadRef.current) {
-            scrollToBottom('instant');
-            isFirstLoadRef.current = false;
-          } else {
-            smoothScrollToBottom();
-          }
-          lastContentHeightRef.current = chatContainerRef.current?.scrollHeight || 0;
-        }, 100);
-        
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [messages, scrollToBottom, smoothScrollToBottom]);
-
-  // Efek untuk memantau perubahan konten saat AI sedang merespons
-  useEffect(() => {
-    if (isLoading) {
-      // Mulai interval untuk memeriksa konten baru saat AI sedang merespons
-      autoScrollIntervalRef.current = setInterval(() => {
-        checkForNewContentAndScroll();
-      }, 300);
-    } else {
-      // Hentikan interval ketika AI selesai merespons
-      if (autoScrollIntervalRef.current) {
-        clearInterval(autoScrollIntervalRef.current);
-        autoScrollIntervalRef.current = null;
-      }
-    }
-
-    return () => {
-      if (autoScrollIntervalRef.current) {
-        clearInterval(autoScrollIntervalRef.current);
-        autoScrollIntervalRef.current = null;
-      }
-    };
-  }, [isLoading, checkForNewContentAndScroll]);
-
-  // Handle scroll event untuk mendeteksi ketika user manual scroll
-  useEffect(() => {
-    const container = chatContainerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      // Cek apakah user sudah scroll ke atas (tidak di bagian paling bawah)
-      const scrollThreshold = 100;
-      const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < scrollThreshold;
-      
-      if (!isAtBottom) {
-        userScrolledUpRef.current = true;
-        setShowScrollToBottom(true);
-      } else {
-        userScrolledUpRef.current = false;
-        setShowScrollToBottom(false);
-      }
-      
-      // Clear previous timeout
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-      
-      // Set timeout untuk hide scroll to bottom button setelah beberapa saat
-      scrollTimeoutRef.current = setTimeout(() => {
-        if (!isAtBottom) {
-          setShowScrollToBottom(true);
-        }
-      }, 2000);
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Scroll to bottom button handler
-  const handleScrollToBottomClick = () => {
-    smoothScrollToBottom();
-    setShowScrollToBottom(false);
-    userScrolledUpRef.current = false;
-  };
-
-  // Reset scroll state ketika chat kosong
-  useEffect(() => {
-    if (messages.length === 0) {
-      userScrolledUpRef.current = false;
-      setShowScrollToBottom(false);
-      isFirstLoadRef.current = true;
-      lastContentHeightRef.current = 0;
-    }
-  }, [messages.length]);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -449,10 +275,7 @@ export default function ChatPage() {
         </div>
 
         <div className="flex h-full w-full flex-col overflow-hidden relative">
-          <div 
-            ref={chatContainerRef}
-            className="flex-1 overflow-y-auto p-4 md:p-6 scrollbar-thin scrollbar-thumb-[#B51D2A]/30 scrollbar-track-transparent hover:scrollbar-thumb-[#B51D2A]/50 transition-colors"
-          >
+          <div className="flex-1 overflow-y-auto p-4 md:p-6">
             {messages.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -602,26 +425,6 @@ export default function ChatPage() {
               </AnimatePresence>
             )}
           </div>
-
-          {/* Scroll to bottom button */}
-          <AnimatePresence>
-            {showScrollToBottom && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                className="absolute bottom-4 right-4 z-20"
-              >
-                <Button
-                  onClick={handleScrollToBottomClick}
-                  className="rounded-full bg-[#B51D2A] hover:bg-[#B51D2A]/90 px-3 py-2 shadow-lg transition-all duration-300"
-                  size="lg"
-                >
-                  <ArrowDown className="h-5 w-5" />
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </main>
 
