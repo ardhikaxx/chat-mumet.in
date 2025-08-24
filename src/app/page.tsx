@@ -404,6 +404,38 @@ export default function ChatPage() {
                                   {children}
                                 </p>
                               ),
+                              table: ({ children }: ReactMarkdownProps) => (
+                                <div className="overflow-x-auto my-4 rounded-lg border border-[#ffffff08]">
+                                  <table className="min-w-full divide-y divide-[#ffffff08]">
+                                    {children}
+                                  </table>
+                                </div>
+                              ),
+                              thead: ({ children }: ReactMarkdownProps) => (
+                                <thead className="bg-[#0a0a0a]">
+                                  {children}
+                                </thead>
+                              ),
+                              tbody: ({ children }: ReactMarkdownProps) => (
+                                <tbody className="divide-y divide-[#ffffff08] bg-[#0f0f0f]">
+                                  {children}
+                                </tbody>
+                              ),
+                              tr: ({ children }: ReactMarkdownProps) => (
+                                <tr className="even:bg-[#0a0a0a] hover:bg-[#0a0a0a]/50 transition-colors">
+                                  {children}
+                                </tr>
+                              ),
+                              th: ({ children }: ReactMarkdownProps) => (
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider border-b border-[#ffffff08]">
+                                  {children}
+                                </th>
+                              ),
+                              td: ({ children }: ReactMarkdownProps) => (
+                                <td className="px-4 py-3 text-sm text-gray-300 border-b border-[#ffffff08]">
+                                  {children}
+                                </td>
+                              ),
                             }}
                           >
                             {message.content}
